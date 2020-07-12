@@ -5,54 +5,77 @@ import 'package:nyxx/nyxx.dart';
 import 'package:remindart/plan.dart';
 
 class Remindart extends Nyxx {
-  DateTime now;
-  List<Plan> planList;
+  static DateTime now = DateTime.now();
+  static List<Plan> planList = [];
 
   Remindart(String _token) : super(_token) {
-    planList = [];
-    onMessageReceived.listen((event) => executeMessageCommnad(event));
+    Timer.periodic(Duration(minutes: 1), (Timer t) {
+      now = DateTime.now();
+      print(now.toIso8601String());
+
+      planList.forEach((plan) => print(plan.name));
+    });
   }
 
-  // TODO
-  final _timeController = StreamController<DateTime>();
-
-  DateTime decodeTime(List<String> time) {
-    return DateTime(
-      int.parse(time[0]),
-      int.parse(time[1]),
-      int.parse(time[2]),
-      int.parse(time[3]),
-      int.parse(time[4]),
-    );
-  }
-
-  void executeMessageCommnad(MessageReceivedEvent event) {
-    final message = event.message;
-    final contents = message.content.split(' ');
-    final channel = message.channel;
-    final authorID = message.author.id.toString();
-
-    if (contents[0] == 'remind') {
-      planList.add(Plan(
-        authorID: message.author.id.toString(),
-        name: contents[1],
-        body: contents[2],
-        scheduledTime: decodeTime(contents[3].split(':')),
-      ));
-      channel.send(
-          content:
-              '<@!${authorID}>\n${contents[3]}に予定 ${contents[1]} を設定しました！');
+  static void addPlan(
+      TextChannel channel, String authorID, List<String> contents) {
+    if (contents.length < 5) {
+      channel.send(content: formattedErrorMessage(authorID, '引数の数が足りていない'));
+      return;
     }
+
+    final date = contents[3].split('/');
+    final time = contents[4].split(':');
+    print('${date.length} / ${time.length}');
+
+    for (var element in date) {
+      if (int.tryParse(element) == null || date.length < 3) {
+        channel.send(content: formattedErrorMessage(authorID, '日にちの指定が間違っている'));
+        return;
+      }
+    }
+
+    for (var element in time) {
+      if (int.tryParse(element) == null ||
+          time.length < 2 ||
+          int.parse(element) > 60) {
+        channel.send(content: formattedErrorMessage(authorID, '時間の指定が間違っている'));
+        return;
+      }
+    }
+
+    // キレそう
+    if (now.year > int.parse(date[0]) ||
+        (now.year == int.parse(date[0]) &&
+            (now.month > int.parse(date[1]) ||
+                (now.month == int.parse(date[1]) &&
+                    now.day > int.parse(date[2]))))) {
+      channel.send(
+          content: formattedErrorMessage(authorID, '現在よりも以前の時間で登録しようとするなカス'));
+      return;
+    }
+
+    planList.add(Plan(
+      authorID: authorID,
+      name: contents[1],
+      body: contents[2],
+      date: date,
+      time: time,
+    ));
+
+    channel.send(
+        content:
+            '<@!${authorID}>さん！\n${contents[3]}  ${contents[4]}に、予定  \"${contents[1]}\"  を登録しました！');
   }
+
+  static String formattedErrorMessage(String authorID, String errorMessage) =>
+      'あばばばば…、 <@!${authorID}> さん！どうやらエラーが起きてしまったようです！\nエラー内容は、"${errorMessage}" とのことです！';
 
   @override
   Stream<ReadyEvent> get onReady {
     print('================ Successfully Logged In ================');
-    // TODO 予定をデータベースからフェッチするようにする
-    Timer.periodic(Duration(minutes: 1), (Timer t) {
-      now = DateTime.now();
-      print(now.toIso8601String());
-    });
+
+    // ここかコンストラクタ内で予定をデータベースからフェッチするようにする
 
     return super.onReady;
   }
