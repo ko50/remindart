@@ -1,9 +1,12 @@
 import 'package:nyxx/nyxx.dart';
 
 import 'package:remindart/remindart.dart';
+import 'package:remindart/plan.dart';
 
 class CommandUtil {
   CommandUtil.executeMessageCommand(MessageReceivedEvent event) {
+    if (event.message.author.bot) return;
+
     final message = event.message;
     final channel = message.channel;
     final authorID = message.author.id.toString();
@@ -79,18 +82,19 @@ class CommandUtil {
   }
 
   void remove(TextChannel chan, String authorID, String name) {
-    var selectedPlan;
-    try {
-      selectedPlan = Remindart.planList.singleWhere(
-          (plan) => plan.name == name && plan.authorID == authorID);
-    } catch (e) {
+    final planList = Remindart.planList;
+    final matchedPlan = planList
+        .where((plan) => plan.name == name && plan.authorID == authorID)
+        .toList();
+    if (planList.isEmpty || matchedPlan.isEmpty) {
       chan.send(content: formattedErrorMessage(authorID, '存在しない予定は削除できません'));
       return;
     }
-    final index = Remindart.planList.indexOf(selectedPlan);
+
+    var selectedPlan = matchedPlan.first;
+    final index = planList.indexOf(selectedPlan);
     Remindart.removePlan(index);
-    chan.send(
-        content: '<@!${authorID}>さん！\n"予定 \"${name}\" は正常に削除されました"、だそうです！');
+    chan.send(content: '<@!${authorID}>さん！\n予定 \"${name}\" は正常に削除されましたよ！');
   }
 
   String formattedErrorMessage(String authorID, String errorMessage) =>
