@@ -20,16 +20,18 @@ class Remindart extends Nyxx {
     });
   }
 
-  static void addPlan(TextChannel channel, String authorID,
-      List<String> commands, DateTime scheduledTime) {
+  static void addPlan(TextChannel chan, String authorID, List<String> orders,
+      DateTime scheduledTime) {
     planList.add(Plan(
       authorID: authorID,
-      name: commands[1],
-      body: commands[2],
-      channel: channel,
+      name: orders[0],
+      body: orders[1],
+      chan: chan,
       scheduledTime: scheduledTime,
     ));
   }
+
+  static void removePlan(int index) => planList.removeAt(index);
 
   @override
   Stream<ReadyEvent> get onReady {
