@@ -3,12 +3,12 @@ import 'package:nyxx/nyxx.dart';
 class Plan {
   String authorID;
   String name;
-  String body;
+  String describe;
   DateTime scheduledTime;
   TextChannel chan;
   bool past = false;
 
-  Plan({this.authorID, this.name, this.body, this.scheduledTime, this.chan});
+  Plan({this.authorID, this.name, this.describe, this.scheduledTime, this.chan});
 
   void notifyScheduledTime(DateTime now) {
     if (scheduledTime.difference(now).inSeconds > 60) return;

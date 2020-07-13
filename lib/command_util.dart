@@ -8,7 +8,7 @@ class CommandUtil {
     if (event.message.author.bot) return;
 
     final message = event.message;
-    final channel = message.channel;
+    final chan = message.channel;
     final authorID = message.author.id.toString();
     final contents = message.content.split(' ');
     final prefix = contents[0];
@@ -19,10 +19,10 @@ class CommandUtil {
 
       switch (subCommand) {
         case 'add':
-          add(channel, authorID, orders);
+          add(chan, authorID, orders);
           return;
         case 'remove':
-          remove(channel, authorID, orders.join(' '));
+          remove(chan, authorID, orders.join(' '));
           return;
         case 'list':
           return;

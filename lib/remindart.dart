@@ -23,7 +23,7 @@ class Remindart extends Nyxx {
     planList.add(Plan(
       authorID: authorID,
       name: orders[0],
-      body: orders[1],
+      describe: orders[1],
       chan: chan,
       scheduledTime: scheduledTime,
     ));
