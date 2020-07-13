@@ -5,8 +5,6 @@ import 'package:nyxx/nyxx.dart';
 import 'package:remindart/plan.dart';
 import 'package:remindart/timer_util.dart';
 
-// TODO リストアップ処理、キャンセル処理、予定通知処理を追加しよう
-
 class Remindart extends Nyxx {
   static DateTime now = DateTime.now();
   static List<Plan> planList = [];

@@ -1,9 +1,6 @@
-import 'dart:async';
-
 import 'package:nyxx/nyxx.dart';
 
 import 'package:remindart/remindart.dart';
-import 'package:remindart/plan.dart';
 
 class CommandUtil {
   CommandUtil.executeMessageCommand(MessageReceivedEvent event) {
@@ -13,7 +10,7 @@ class CommandUtil {
     final contents = message.content.split(' ');
     final prefix = contents[0];
 
-    if (prefix == 'remind' && contents.length >= 3) {
+    if (prefix == 'reminder' && contents.length >= 3) {
       final subCommand = contents[1];
       final orders = contents.sublist(2);
 
@@ -22,10 +19,12 @@ class CommandUtil {
           add(channel, authorID, orders);
           return;
         case 'remove':
-          remove(channel, authorID, orders);
+          remove(channel, authorID, orders.join(' '));
           return;
         case 'list':
+          return;
         case 'show':
+          return;
       }
     }
   }
@@ -79,17 +78,23 @@ class CommandUtil {
             '<@!${authorID}>さん！\n${orders[2]}  ${orders[3]}に、予定  \"${orders[0]}\"  を登録しました！');
   }
 
-  void remove(TextChannel chan, String authorID, List<String> orders) {
-    final name = orders[0];
-    var selectedPlan =
-        Remindart.planList.singleWhere((plan) => plan.name == name);
+  void remove(TextChannel chan, String authorID, String name) {
+    var selectedPlan;
+    try {
+      selectedPlan = Remindart.planList.singleWhere(
+          (plan) => plan.name == name && plan.authorID == authorID);
+    } catch (e) {
+      chan.send(content: formattedErrorMessage(authorID, '存在しない予定は削除できません'));
+      return;
+    }
     final index = Remindart.planList.indexOf(selectedPlan);
     Remindart.removePlan(index);
-    chan.send(content: '<@!${authorID}>さん！\n"予定 \"${name}\" は正常に削除されました"、だそうです！');
+    chan.send(
+        content: '<@!${authorID}>さん！\n"予定 \"${name}\" は正常に削除されました"、だそうです！');
   }
 
   String formattedErrorMessage(String authorID, String errorMessage) =>
-      'あばばばば…、 <@!${authorID}> さん！ど、どうやらエラーが起きてしまったようです…。\nエラーの内容によると、"${errorMessage}" だそうです！';
+      'あばばばばば…、 <@!${authorID}> さん！ど、どうやらエラーが起きてしまったようです…。\nエラーの内容によると、"${errorMessage}" だそうです！';
 
   // 正規表現でバリデーションチェックして DateTime.parse(String) でやった方がよい
   DateTime decodeTime(List<String> date, List<String> time) {
