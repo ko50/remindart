@@ -7,11 +7,13 @@ class TimerUtil {
       StreamController<DateTime>();
 
   TimerUtil() {
-    sleep(Duration(seconds: 60 - now.second));
+    print('Time Adjusting. Please Wait Just a Little...');
+    sleep(Duration(
+        seconds: 60 - now.second, microseconds: 1000 - now.millisecond));
     Timer.periodic(Duration(minutes: 1), (Timer t) {
       now = DateTime.now();
-      add(now);
       print(now.toIso8601String());
+      add(now);
     });
   }
 
