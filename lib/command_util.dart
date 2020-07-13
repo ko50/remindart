@@ -1,6 +1,7 @@
 import 'package:nyxx/nyxx.dart';
 
 import 'package:remindart/remindart.dart';
+import 'package:remindart/embed_util.dart';
 import 'package:remindart/plan.dart';
 
 class CommandUtil {
@@ -24,9 +25,11 @@ class CommandUtil {
         case 'remove':
           remove(chan, authorID, orders.join(' '));
           return;
-        case 'list':
-          return;
         case 'show':
+          show(chan, authorID, orders);
+          return;
+        case 'list':
+          list(chan, authorID, orders);
           return;
       }
     }
@@ -94,8 +97,39 @@ class CommandUtil {
     var selectedPlan = matchedPlan.first;
     final index = planList.indexOf(selectedPlan);
     Remindart.removePlan(index);
-    chan.send(content: '<@!${authorID}>さん！\n予定 \"${name}\" は正常に削除されましたよ！');
+    chan.send(content: '<@!${authorID}>さん！\n予定 \"${name}\" は正常に削除されたみたいです！');
   }
+
+  void show(TextChannel chan, String authorID, List<String> orders) {
+    var settedAuthorID = authorID;
+    final planName = orders.first;
+
+    if (orders.length > 2) {
+      switch (orders[1]) {
+        case '-u':
+        case '--user':
+          settedAuthorID = orders[2];
+      }
+    }
+
+    final planList = Remindart.planList;
+    final matchedPlan = planList
+        .where(
+            (plan) => plan.name == planName && plan.authorID == settedAuthorID)
+        .toList();
+    if (planList.isEmpty || matchedPlan.isEmpty) {
+      chan.send(
+          content: formattedErrorMessage(
+              authorID, '該当する予定が存在しません  IDを `-u` か `--user` で指定してみてください'));
+      return;
+    }
+
+    var selectedPlan = matchedPlan.first;
+    chan.send(embed: buildEmbedPlan(selectedPlan));
+  }
+
+  // TODO †実装†
+  void list(TextChannel chan, String authorID, List<String> orders) {}
 
   String formattedErrorMessage(String authorID, String errorMessage) =>
       'あばばばばば…、 <@!${authorID}> さん！ど、どうやらエラーが起きてしまったようです…。\nエラーの内容によると、"${errorMessage}" だそうです！';
