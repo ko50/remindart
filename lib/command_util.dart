@@ -14,6 +14,10 @@ class CommandUtil {
     final contents = message.content.split(' ');
     final prefix = contents[0];
 
+    if (prefix == '<@!731008600339644466>' &&
+        contents.length == 2 &&
+        contents[1] == 'help') help(chan);
+
     if (prefix == 'reminder' && contents.length >= 3) {
       final subCommand = contents[1];
       final orders = contents.sublist(2);
@@ -35,6 +39,7 @@ class CommandUtil {
     }
   }
 
+  // エラー判定は関数化できますよね？やれ
   void add(TextChannel chan, String authorID, List<String> orders) {
     final now = Remindart.now;
 
@@ -130,6 +135,10 @@ class CommandUtil {
 
   // TODO †実装†
   void list(TextChannel chan, String authorID, List<String> orders) {}
+
+  void help(TextChannel chan) {
+    chan.send(embed: buildEmbedHelp());
+  }
 
   String formattedErrorMessage(String authorID, String errorMessage) =>
       'あばばばばば…、 <@!${authorID}> さん！ど、どうやらエラーが起きてしまったようです…。\nエラーの内容によると、"${errorMessage}" だそうです！';
