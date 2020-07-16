@@ -10,11 +10,12 @@ EmbedBuilder buildEmbedPlan(Plan plan) => EmbedBuilder()
     ..iconUrl = icon_url
     ..name = '予定の詳細')
   ..color = remindart_color
-  ..title = '予定名: ${plan.name}'
-  ..description =
-      '説明: ${plan.describe}\n日時: ${plan.scheduledTime.toIso8601String()}'
+  ..title = '${plan.name}'
+  ..description = '`説明`\n${plan.describe}\n\n'
+      '`日時`\n${plan.scheduledTime.toIso8601String()}\n'
+      '--------------------------------------------'
   ..footer =
-      (EmbedFooterBuilder()..text = '予定の時間が来たら起こしてあげますから、それまではゆっくり休んでください！');
+      (EmbedFooterBuilder()..text = '予定の時間になったら私が起こしてあげますから、安心してゆっくり休んでください！');
 
 EmbedBuilder buildEmbedListedPlan(
     String mode, List<Plan> planList, String authorID) {
